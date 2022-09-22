@@ -195,11 +195,23 @@ timeFORMAT="+%l:%M %p" # Formatting options can be found in the man page for the
 # The default amount of time in seconds to leave test notifications and dialogs open before moving on in the workflow.
 testModeTIMEOUT=10
 
-# These parameters identify the macOS version and architecture.
+# These parameters identify the macOS version.
 macosMAJOR=$(sw_vers -productVersion | cut -d'.' -f1) # Expected output: 10, 11, 12
 macosMINOR=$(sw_vers -productVersion | cut -d'.' -f2) # Expected output: 14, 15, 06, 01
 macosVERSION=${macosMAJOR}$(printf "%02d" "$macosMINOR") # Expected output: 1014, 1015, 1106, 1200
-macosARCH=$(arch) # Expected output: i386, arm64
+
+# Find architecture based on the kernel incase super is called from script running in rosetta
+ARCH=$(sysctl kern.version | awk -F'_' '/RELEASE/{print $2}')
+if [[ "$ARCH" == "ARM64" ]]
+then
+	macosARCH='arm64'
+elif [[ "$ARCH" == "X86" ]]
+then
+	macosARCH='i386'
+else
+	macosARCH=$(arch)
+fi
+
 }
 
 # Collect input options and set associated parameters.
